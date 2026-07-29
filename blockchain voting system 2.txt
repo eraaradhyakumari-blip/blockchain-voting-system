@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simple Blockchain Voting System</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f0f2f5;
+}
+
+.container{
+    width:450px;
+    margin:30px auto;
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 0 10px gray;
+}
+
+h2{
+    text-align:center;
+    color:darkblue;
+}
+
+input,select,button{
+    width:100%;
+    padding:10px;
+    margin-top:10px;
+    font-size:16px;
+}
+
+button{
+    background:green;
+    color:white;
+    border:none;
+    cursor:pointer;
+}
+
+button:hover{
+    background:darkgreen;
+}
+
+.result{
+    margin-top:20px;
+    background:#eef;
+    padding:10px;
+    border-radius:5px;
+}
+
+.block{
+    background:#f8f8f8;
+    padding:8px;
+    margin-top:8px;
+    border-left:5px solid blue;
+    font-size:13px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>Blockchain Voting System</h2>
+
+<input type="text" id="voterName" placeholder="Enter Your Name">
+
+<input type="number" id="age" placeholder="Enter Age">
+
+<input type="text" id="aadhar" placeholder="Enter 12 Digit Aadhaar Number" maxlength="12">
+
+<select id="candidate">
+<option value="">Select Candidate</option>
+<option>Rahul</option>
+<option>Manish</option>
+<option>Ishan</option>
+<option>Aradhya</option>
+</select>
+
+<button onclick="vote()">Vote</button>
+
+<div class="result">
+
+<h3>Results</h3>
+
+<p>Rahul : <span id="rahul">0</span></p>
+
+<p>Manish : <span id="manish">0</span></p>
+
+<p>Ishan : <span id="ishan">0</span></p>
+
+<p>Aradhya : <span id="aradhya">0</span></p>
+
+<h3>Blockchain</h3>
+
+<div id="chain"></div>
+
+</div>
+
+</div>
+
+<script>
+
+let blockchain=[];
+let voted=[];
+
+let votes={
+Rahul:0,
+Manish:0,
+Ishan:0,
+Aradhya:0
+};
+
+function simpleHash(text){
+let hash=0;
+
+for(let i=0;i<text.length;i++){
+hash=((hash<<5)-hash)+text.charCodeAt(i);
+hash=hash & hash;
+}
+return hash.toString();
+}
+
+function vote(){
+
+let name=document.getElementById("voterName").value;
+let age=document.getElementById("age").value;
+let aadhar=document.getElementById("aadhar").value;
+let candidate=document.getElementById("candidate").value;
+
+if(name==""||age==""||aadhar==""||candidate==""){
+alert("Fill all details");
+return;
+}
+
+if(age<18){
+alert("Only 18+ can vote");
+return;
+}
+
+if(aadhar.length!=12){
+alert("Aadhaar Number must be 12 digits");
+return;
+}
+
+if(voted.includes(aadhar)){
+alert("You have already voted");
+return;
+}
+
+votes[candidate]++;
+
+document.getElementById("rahul").innerHTML=votes.Rahul;
+document.getElementById("manish").innerHTML=votes.Manish;
+document.getElementById("ishan").innerHTML=votes.Ishan;
+document.getElementById("aradhya").innerHTML=votes.Aradhya;
+
+let previousHash=blockchain.length==0 ? "0" : blockchain[blockchain.length-1].hash;
+
+let data=name+candidate+aadhar+Date.now();
+
+let hash=simpleHash(data+previousHash);
+
+let block={
+index:blockchain.length+1,
+name:name,
+candidate:candidate,
+previousHash:previousHash,
+hash:hash
+};
+
+blockchain.push(block);
+
+voted.push(aadhar);
+
+displayChain();
+
+document.getElementById("voterName").value="";
+document.getElementById("age").value="";
+document.getElementById("aadhar").value="";
+document.getElementById("candidate").value="";
+}
+
+function displayChain(){
+
+let output="";
+
+for(let b of blockchain){
+
+output+=`
+<div class="block">
+<b>Block:</b> ${b.index}<br>
+<b>Voter:</b> ${b.name}<br>
+<b>Candidate:</b> ${b.candidate}<br>
+<b>Previous Hash:</b> ${b.previousHash}<br>
+<b>Hash:</b> ${b.hash}
+</div>
+`;
+
+}
+
+document.getElementById("chain").innerHTML=output;
+
+}
+
+</script>
+
+</body>
+</html>
